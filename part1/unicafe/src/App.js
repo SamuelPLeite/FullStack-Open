@@ -17,6 +17,8 @@ const Buttons = ({ clickGood, clickNeutral, clickBad }) => (
   </>
 )
 
+const StatisticLine = ({ text, value }) => <>{text} {value} <br></br></>
+
 const Statistics = ({ good, neutral, bad }) => {
   const all = good + neutral + bad
   let avg = 0
@@ -29,12 +31,16 @@ const Statistics = ({ good, neutral, bad }) => {
   return (
     <div>
       <h1>statistics</h1>
-      good {good} <br></br>
-      neutral {neutral} <br></br>
-      bad {bad} <br></br>
-      all {all} <br></br>
-      average {avg} <br></br>
-      positive {pst} % <br></br>
+      {all !== 0 ?
+        <>
+          <StatisticLine text='good' value={good} />
+          <StatisticLine text='neutral' value={neutral} />
+          <StatisticLine text='bad' value={bad} />
+          <StatisticLine text='all' value={all} />
+          <StatisticLine text='average' value={avg} />
+          <StatisticLine text='positive' value={`${pst} %`} />
+        </> : 'No feedback given'
+      }
     </div>
   )
 }
