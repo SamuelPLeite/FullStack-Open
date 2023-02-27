@@ -1,5 +1,31 @@
 import { useState } from 'react'
 
+const Header = () => (
+  <header>
+    <h1>give feedback</h1>
+  </header>
+)
+
+const Button = ({ onClick, text }) =>
+  <button onClick={onClick}>{text}</button>
+
+const Buttons = ({ clickGood, clickNeutral, clickBad }) => (
+  <>
+    <Button onClick={clickGood} text='good' />
+    <Button onClick={clickNeutral} text='neutral' />
+    <Button onClick={clickBad} text='bad' />
+  </>
+)
+
+const Stats = ({ good, neutral, bad }) => (
+  <div>
+    <h1>statistics</h1>
+    good {good} <br></br>
+    neutral {neutral} <br></br>
+    bad {bad} <br></br>
+  </div>
+)
+
 const App = () => {
   // save clicks of each button to its own state
   const [good, setGood] = useState(0)
@@ -10,37 +36,11 @@ const App = () => {
   const clickNeutral = () => setNeutral(neutral + 1)
   const clickBad = () => setBad(bad + 1)
 
-  const Button = ({ onClick, text }) =>
-    <button onClick={onClick}>{text}</button>
-
-  const Buttons = () => (
-    <>
-      <Button onClick={clickGood} text='good' />
-      <Button onClick={clickNeutral} text='neutral' />
-      <Button onClick={clickBad} text='bad' />
-    </>
-  )
-
-  const Header = () => (
-    <header>
-      <h1>give feedback</h1>
-    </header>
-  )
-
-  const Stats = () => (
-    <div>
-      <h1>statistics</h1>
-      good {good} <br></br>
-      neutral {neutral} <br></br>
-      bad {bad} <br></br>
-    </div>
-  )
-
   return (
     <div>
       <Header />
-      <Buttons />
-      <Stats />
+      <Buttons clickGood={clickGood} clickNeutral={clickNeutral} clickBad={clickBad} />
+      <Stats good={good} neutral={neutral} bad={bad} />
     </div>
   )
 }
