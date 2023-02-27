@@ -17,7 +17,7 @@ const Buttons = ({ clickGood, clickNeutral, clickBad }) => (
   </>
 )
 
-const StatisticLine = ({ text, value }) => <>{text} {value} <br></br></>
+const StatisticLine = ({ text, value }) => <tr><td>{text}</td><td>{value}</td></tr>
 
 const Statistics = ({ good, neutral, bad }) => {
   const all = good + neutral + bad
@@ -25,21 +25,23 @@ const Statistics = ({ good, neutral, bad }) => {
   let pst = 0
 
   if (all !== 0) {
-    avg = (good - bad) / all
-    pst = 100 * good / all
+    avg = ((good - bad) / all).toPrecision(5)
+    pst = (100 * good / all).toPrecision(5)
   }
   return (
     <div>
       <h1>statistics</h1>
       {all !== 0 ?
-        <>
-          <StatisticLine text='good' value={good} />
-          <StatisticLine text='neutral' value={neutral} />
-          <StatisticLine text='bad' value={bad} />
-          <StatisticLine text='all' value={all} />
-          <StatisticLine text='average' value={avg} />
-          <StatisticLine text='positive' value={`${pst} %`} />
-        </> : 'No feedback given'
+        <table>
+          <tbody>
+            <StatisticLine text='good' value={good} />
+            <StatisticLine text='neutral' value={neutral} />
+            <StatisticLine text='bad' value={bad} />
+            <StatisticLine text='all' value={all} />
+            <StatisticLine text='average' value={avg} />
+            <StatisticLine text='positive' value={`${pst} %`} />
+          </tbody>
+        </table> : 'No feedback given'
       }
     </div>
   )
