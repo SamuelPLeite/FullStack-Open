@@ -78,8 +78,8 @@ const App = () => {
               handleNotification(`Updated ${updatedPerson.name}'s number`, 'success')
             })
             .catch(error => {
-              handleNotification(`Information of ${newName} has already been remove from the server`, 'error')
-              setPersons(persons.filter(person => person.id !== findPerson.id))
+              handleValidationError(error, personObject, 'update')
+              if (!error.response) setPersons(persons.filter(person => person.id !== findPerson.id))
             })
     }
     else
@@ -90,6 +90,8 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           handleNotification(`Added ${returnedPerson.name}`, 'success')
         })
+        .catch(error =>
+          handleValidationError(error, personObject, 'create'))
 
   }
 
@@ -119,6 +121,7 @@ const App = () => {
           handleNotification(`Deleted ${name}`, 'success')
         })
         .catch(error => {
+          console.log(error)
           handleNotification(`Information of ${name} has already been remove from the server`, 'error')
           setPersons(persons.filter(person => person.id !== id))
         })
@@ -131,7 +134,40 @@ const App = () => {
     setTimeout(() => {
       setNotification(null)
       setResCode(null)
-    }, 5000)
+    }, 7000)
+  }
+
+  const handleValidationError = (error, person, source) => {
+    if (error.response) {
+      const errorCode = error.response.data.error
+      console.log(errorCode)
+
+      if (errorCode.includes(`name: Path \`name\` (\`${person.name}\`) is shorter than the minimum allowed length (3).`))
+        handleNotification(`Name ${person.name} is too short, needs to be atlest 3 characters long.`, 'error')
+
+      if (errorCode.includes(`number: number ${person.number} format is incorrect.`) || errorCode.includes('is shorter than the minimum allowed length (8).'))
+        handleNotification(`Number ${person.number} has incorrect format, should be atleast 8 digits long, contain at most 1 '-'`, 'error')
+
+      if (source === 'create') {
+        if (errorCode.includes('number: Path `number` is required.'))
+          handleNotification('A phone number is required to add a new person.', 'error')
+
+        if (errorCode.includes('name: Path `name` is required.'))
+          handleNotification('A name is required to add a new person.', 'error')
+      }
+
+      if (source === 'update') {
+        if (errorCode.includes('number: Path `number` is required.'))
+          handleNotification('You cannot remove a person\'s number, delete them instead.', 'error')
+
+        if (errorCode.includes('name: Path `name` is required.'))
+          handleNotification('You cannot remove a person\'s name, delete them instead.', 'error')
+      }
+
+    } else if (source === 'update') {
+      handleNotification(`Information of ${person.name} has already been remove from the server`, 'error')
+    }
+
   }
 
   return (
