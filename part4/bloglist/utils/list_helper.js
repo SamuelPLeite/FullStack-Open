@@ -47,7 +47,6 @@ const mostLikes = (blogs) => {
       }))
       .value()
     const maxLikes = _.maxBy(authorLikes, 'likes').likes
-    console.log(_.filter(authorLikes, (author) => author.likes === maxLikes))
     return _.filter(authorLikes, (author) => author.likes === maxLikes)
   } else {
     return { error: 'There are no blogs' }

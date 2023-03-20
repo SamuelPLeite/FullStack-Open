@@ -3,7 +3,8 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-const { blogsInDb } = require('./test_helper')
+const { describe } = require('node:test')
+
 
 const api = supertest(app)
 
@@ -16,8 +17,8 @@ beforeEach(async () => {
   await Promise.all(promiseArray)
 })
 
-describe('/api/blogs', () => {
-  test('correct amount of notes are returned as json', async () => {
+describe('receiving one or many blogs', () => {
+  test('correct amount of blogs are returned as json', async () => {
     const response = await api
       .get('/api/blogs')
       .expect(200)
@@ -32,6 +33,20 @@ describe('/api/blogs', () => {
     expect(response.body[0].id).toBeDefined()
   })
 
+  test('viewing a specific blog', async () => {
+    const initialBlogsDb = await helper.blogsInDb()
+    const blogSpecific = initialBlogsDb[0]
+
+    const resultBlog = await api
+      .get(`/api/blogs/${blogSpecific.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    expect(resultBlog.body).toEqual(blogSpecific)
+  })
+})
+
+describe('adding new blogs to database', () => {
   test('post request successfully creates a new blog post', async () => {
     const newBlog = {
       title: 'Type wars',
@@ -100,8 +115,68 @@ describe('/api/blogs', () => {
 
     expect(response.body).toHaveProperty('error', 'Blog validation failed: url: Path `url` is required.')
   })
+})
 
-  afterAll(async () => {
-    await mongoose.connection.close()
+describe('deleting blogs from database', () => {
+  test('deleting a blog successfully', async () => {
+    const initialBlogsDb = await helper.blogsInDb()
+    const blogToDelete = initialBlogsDb[0]
+
+    const response = await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsPostDeletion = await helper.blogsInDb()
+    const blogIds = blogsPostDeletion.map(blog => blog.id)
+
+    expect(blogsPostDeletion).toHaveLength(initialBlogsDb.length - 1)
+    expect(blogIds).not.toContain(blogToDelete.id)
   })
+
+  test('deleting a blog with invalid id', async () => {
+    const invalidId = '6a3d5da59070081a82a3445'
+
+    await api
+      .get(`/api/blogs/${invalidId}`)
+      .expect(400)
+  })
+})
+
+describe('updating blogs in database', () => {
+  test('updating blog successfully', async () => {
+    const initialBlogsDb = await helper.blogsInDb()
+    const blogToUpdate = initialBlogsDb[0]
+    const blogUpdate = {
+      title: 'New Title',
+      author: 'New Author',
+      url: 'New Url',
+      likes: blogToUpdate.likes + 10
+    }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(blogUpdate)
+      .expect(200)
+
+    const updatedBlog = response.body
+    expect(updatedBlog).toHaveProperty('title', 'New Title')
+    expect(updatedBlog).toHaveProperty('likes', blogToUpdate.likes + 10)
+
+    const updatedBlogDb = await Blog.findById(blogToUpdate.id)
+    expect(updatedBlogDb).toHaveProperty('title', 'New Title')
+    expect(updatedBlogDb).toHaveProperty('likes', blogToUpdate.likes + 10)
+
+  })
+
+  test('updating a blog with invalid id', async () => {
+    const invalidId = '6a3d5da59070081a82a3445'
+
+    await api
+      .put(`/api/blogs/${invalidId}`)
+      .expect(400)
+  })
+})
+
+afterAll(async () => {
+  await mongoose.connection.close()
 })
