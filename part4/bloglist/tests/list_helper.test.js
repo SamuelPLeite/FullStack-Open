@@ -1,5 +1,3 @@
-const { mostLikes } = require('../utils/list_helper')
-const { mostBlogs } = require('../utils/list_helper')
 const listHelper = require('../utils/list_helper')
 
 test('dummy returns one', () => {
@@ -361,7 +359,6 @@ describe('most blogs', () => {
         blogs: 2
       }
     ]
-    mostLikes(listWithManyBlogsMultipleTopAuthors)
     expect(result).toEqual(expectedResult)
   })
 })
