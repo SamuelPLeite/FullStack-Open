@@ -1,23 +1,24 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-const { describe } = require('node:test')
-
+const User = require('../models/user')
 
 const api = supertest(app)
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
 
-  const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
-  const promiseArray = blogObjects.map(blog => blog.save())
-  await Promise.all(promiseArray)
+  const user = helper.initialUsers[0]
+  const passwordHash = await bcrypt.hash(user.password, 10)
+  const newUser = new User({ ...user, passwordHash })
+  await newUser.save()
 })
 
-describe('receiving one or many blogs', () => {
+describe('receiving one or many blogs', () => { // outdated tests
   test('correct amount of blogs are returned as json', async () => {
     const response = await api
       .get('/api/blogs')
@@ -54,20 +55,35 @@ describe('adding new blogs to database', () => {
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
       likes: 2
     }
+    const userLogin = {
+      username: 'root',
+      password: 'PAXXWORD'
+    }
+
+    const loginData = await api
+      .post('/api/login')
+      .send(userLogin)
+      .expect(200)
+
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${loginData.body.token}`)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     const blogBody = response.body
     const blogsAfter = await helper.blogsInDb()
+    const userAfter = (await User.findOne({ username: userLogin.username })).toJSON()
 
-    expect(blogsAfter).toHaveLength(helper.initialBlogs.length + 1)
+    expect(blogBody.user).toBe(userAfter.id)
+    expect(blogBody).toHaveProperty('user',)
     expect(blogBody).toHaveProperty('title', 'Type wars')
     expect(blogBody).toHaveProperty('author', 'Robert C. Martin')
     expect(blogBody).toHaveProperty('url', 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html')
     expect(blogBody).toHaveProperty('likes', 2)
+    expect(blogsAfter).toHaveLength(1)
 
   })
 
@@ -78,9 +94,20 @@ describe('adding new blogs to database', () => {
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
     }
 
+    const userLogin = {
+      username: 'root',
+      password: 'PAXXWORD'
+    }
+
+    const loginData = await api
+      .post('/api/login')
+      .send(userLogin)
+      .expect(200)
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${loginData.body.token}`)
       .expect(201)
 
     expect(response.body).toHaveProperty('likes', 0)
@@ -93,9 +120,20 @@ describe('adding new blogs to database', () => {
       likes: 2
     }
 
+    const userLogin = {
+      username: 'root',
+      password: 'PAXXWORD'
+    }
+
+    const loginData = await api
+      .post('/api/login')
+      .send(userLogin)
+      .expect(200)
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${loginData.body.token}`)
       .expect(400)
 
     expect(response.body).toHaveProperty('error', 'Blog validation failed: title: Path `title` is required.')
@@ -108,16 +146,45 @@ describe('adding new blogs to database', () => {
       likes: 2
     }
 
+    const userLogin = {
+      username: 'root',
+      password: 'PAXXWORD'
+    }
+
+    const loginData = await api
+      .post('/api/login')
+      .send(userLogin)
+      .expect(200)
+
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${loginData.body.token}`)
       .expect(400)
 
     expect(response.body).toHaveProperty('error', 'Blog validation failed: url: Path `url` is required.')
   })
+
+  test('post request successfully creates a new blog post', async () => {
+    const newBlog = {
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      likes: 2
+    }
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+
+    expect(response.body).toHaveProperty('error', 'jwt must be provided')
+  })
 })
 
-describe('deleting blogs from database', () => {
+describe('deleting blogs from database', () => { // outdated tests
   test('deleting a blog successfully', async () => {
     const initialBlogsDb = await helper.blogsInDb()
     const blogToDelete = initialBlogsDb[0]
@@ -142,7 +209,7 @@ describe('deleting blogs from database', () => {
   })
 })
 
-describe('updating blogs in database', () => {
+describe('updating blogs in database', () => { // outdated tests
   test('updating blog successfully', async () => {
     const initialBlogsDb = await helper.blogsInDb()
     const blogToUpdate = initialBlogsDb[0]
