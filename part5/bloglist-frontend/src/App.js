@@ -85,7 +85,7 @@ const App = () => {
 
   const handleAddBlog = async (blogObject) => {
     if (!blogObject.title || !blogObject.author || !blogObject.url)
-      return handleNotification(`All fields must be filled`, 'error')
+      return handleNotification('All fields must be filled', 'error')
 
     const responseBlog = await blogService.create(blogObject)
 
@@ -98,7 +98,7 @@ const App = () => {
 
   const handleUpdateBlog = async (id, blogObject) => {
     if (!blogObject.title || !blogObject.author || !blogObject.url)
-      return handleNotification(`All fields must be filled`, 'error')
+      return handleNotification('All fields must be filled', 'error')
 
     const responseBlog = await blogService.update(id, { ...blogObject, user: blogObject.user.id })
 
@@ -108,7 +108,7 @@ const App = () => {
   const handleDeleteBlog = async (id) => {
     await blogService.remove(id)
 
-    handleNotification(`Blog has been successfully deleted.`, 'success')
+    handleNotification('Blog has been successfully deleted.', 'success')
     setBlogs(blogs.filter(blog => blog.id !== id))
   }
 

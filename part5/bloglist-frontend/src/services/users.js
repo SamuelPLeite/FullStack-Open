@@ -6,5 +6,4 @@ const getWithUsername = async (username) => {
   return response.data.find(user => user.username === username)
 }
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default { getWithUsername }
