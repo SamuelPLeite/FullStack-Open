@@ -29,6 +29,7 @@ const BlogForm = ({ handleAddBlog }) => {
         type="text"
         value={title}
         name="Title"
+        aria-label="title"
         onChange={({ target }) => setTitle(target.value)}
         style={{ marginLeft: 5 }}
       />
@@ -39,6 +40,7 @@ const BlogForm = ({ handleAddBlog }) => {
         type="text"
         value={author}
         name="Author"
+        aria-label="author"
         onChange={({ target }) => setAuthor(target.value)}
         style={{ marginLeft: 5 }}
       />
@@ -49,6 +51,7 @@ const BlogForm = ({ handleAddBlog }) => {
         type="text"
         value={url}
         name="URL"
+        aria-label="url"
         onChange={({ target }) => setUrl(target.value)}
         style={{ marginLeft: 5 }}
       />

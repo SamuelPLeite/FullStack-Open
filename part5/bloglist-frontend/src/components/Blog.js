@@ -5,7 +5,7 @@ const LikesButton = ({ id, updateLikes }) => (
   <button type="button"
     style={{ marginLeft: 10 }}
     onClick={() => updateLikes(id)}
-  >Likes</button>
+  >Like</button>
 )
 
 const VisilityButton = ({ visible, setVisible }) => (
