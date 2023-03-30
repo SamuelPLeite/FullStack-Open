@@ -6,7 +6,7 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import userService from './services/users'
+// import userService from './services/users'
 import './index.css'
 
 const LogoutButton = ({ handleLogout }) => (
@@ -61,17 +61,15 @@ const App = () => {
       const user = await loginService.login({
         username, password,
       })
-      const userObj = await userService.getWithUsername(username)
-      const userWithId = { ...user, id: userObj.id }
 
       window.localStorage.setItem(
-        'loggedBloglistUser', JSON.stringify(userWithId)
+        'loggedBloglistUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
-      setUser(userWithId)
+      setUser(user)
 
       cleanLoginForm()
-      handleNotification(`${userObj.username} has successfully logged in.`, 'success')
+      handleNotification(`${user.username} has successfully logged in.`, 'success')
     } catch (exception) {
       console.log('entered catch')
       handleNotification('Wrong username or password.', 'error')

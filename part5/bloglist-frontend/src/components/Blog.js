@@ -52,7 +52,7 @@ const Blog = ({ blog, userid, handleUpdate, handleDelete }) => {
       return handleDelete(blog.id)
   }
 
-  return <div style={blogStyle}>
+  return <div style={blogStyle} className="blog">
     {blog.title} by {blog.author}
     <VisilityButton visible={visible} setVisible={setVisible} />
     <div style={showWhenVisible}>
